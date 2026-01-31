@@ -23,6 +23,11 @@ Open http://localhost:5173
 
 React, TypeScript, Vite, MUI, Vitest
 
+## Deployment
+
+GitHub Pages via Actions. The workflow runs on each push to `main` and you can also trigger it manually.
+Expected URL: `https://suryanox.github.io/blackboard/`
+
 ## License
 
 MIT. See `LICENSE`.
