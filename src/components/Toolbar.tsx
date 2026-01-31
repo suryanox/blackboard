@@ -1,8 +1,4 @@
 import { Box, IconButton, Tooltip } from '@mui/material';
-import EditIcon from '@mui/icons-material/Edit';
-import AutoFixHighIcon from '@mui/icons-material/AutoFixHigh';
-import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
-import DownloadIcon from '@mui/icons-material/Download';
 import type { Tool } from '../types';
 
 interface ToolbarProps {
@@ -12,50 +8,67 @@ interface ToolbarProps {
   onDownload?: () => void;
 }
 
-const ToolButton = ({ 
-  active, 
-  onClick, 
-  icon, 
-  tooltip,
-  testId,
-}: { 
-  active?: boolean; 
-  onClick: () => void; 
-  icon: React.ReactNode;
-  tooltip: string;
-  testId?: string;
-}) => (
-  <Tooltip title={tooltip} placement="top" arrow>
-    <IconButton
-      onClick={onClick}
-      data-testid={testId}
-      sx={{
-        width: 40,
-        height: 40,
-        borderRadius: 2,
-        backgroundColor: active ? '#6366f1' : 'transparent',
-        color: active ? '#fff' : '#64748b',
-        transition: 'all 0.15s ease',
-        '&:hover': {
-          backgroundColor: active ? '#5558e3' : 'rgba(100, 116, 139, 0.1)',
-          color: active ? '#fff' : '#334155',
-        },
-      }}
-    >
-      {icon}
-    </IconButton>
-  </Tooltip>
+const TrashIcon = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <polyline points="3 6 5 6 21 6" />
+    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+  </svg>
 );
 
-const Divider = () => (
+const DownloadIcon = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+    <polyline points="7 10 12 15 17 10" />
+    <line x1="12" y1="15" x2="12" y2="3" />
+  </svg>
+);
+
+const ChalkIcon = ({ active }: { active: boolean }) => (
   <Box
     sx={{
-      width: 1,
-      height: 24,
-      backgroundColor: '#e2e8f0',
-      mx: 0.5,
+      width: 8,
+      height: 32,
+      borderRadius: '2px 2px 4px 4px',
+      background: active
+        ? 'linear-gradient(90deg, #e0e0e0 0%, #ffffff 50%, #e0e0e0 100%)'
+        : 'linear-gradient(90deg, #a0a0a0 0%, #c0c0c0 50%, #a0a0a0 100%)',
+      boxShadow: active
+        ? '0 0 8px rgba(255,255,255,0.6), 0 2px 4px rgba(0,0,0,0.3)'
+        : '0 2px 4px rgba(0,0,0,0.3)',
+      transition: 'all 0.2s ease',
     }}
   />
+);
+
+const DusterIcon = ({ active }: { active: boolean }) => (
+  <Box sx={{ width: 32, height: 20, position: 'relative' }}>
+    <Box
+      sx={{
+        position: 'absolute',
+        top: 0,
+        left: 2,
+        right: 2,
+        height: 10,
+        borderRadius: '3px 3px 1px 1px',
+        background: active
+          ? 'linear-gradient(180deg, #d4a050 0%, #8b5a2b 100%)'
+          : 'linear-gradient(180deg, #a08060 0%, #6b4423 100%)',
+        boxShadow: active ? '0 0 8px rgba(180,130,80,0.5)' : 'none',
+        transition: 'all 0.2s ease',
+      }}
+    />
+    <Box
+      sx={{
+        position: 'absolute',
+        bottom: 0,
+        left: 0,
+        right: 0,
+        height: 8,
+        borderRadius: '1px 1px 2px 2px',
+        background: 'linear-gradient(180deg, #e8e8e8 0%, #c0c0c0 100%)',
+      }}
+    />
+  </Box>
 );
 
 export const Toolbar = ({ 
@@ -69,47 +82,105 @@ export const Toolbar = ({
       data-testid="toolbar"
       sx={{
         position: 'fixed',
-        bottom: 20,
+        bottom: 0,
         left: '50%',
         transform: 'translateX(-50%)',
-        zIndex: 100,
+        zIndex: 1000,
         display: 'flex',
-        alignItems: 'center',
-        gap: 0.5,
-        padding: '8px 12px',
-        backgroundColor: '#ffffff',
-        borderRadius: 3,
-        boxShadow: '0 4px 24px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.08)',
-        border: '1px solid #e2e8f0',
+        justifyContent: 'center',
       }}
     >
-      <ToolButton
-        active={activeTool === 'chalk'}
-        onClick={() => onToolChange('chalk')}
-        icon={<EditIcon sx={{ fontSize: 20 }} />}
-        tooltip="Chalk (C)"
-        testId="chalk-button"
-      />
-      <ToolButton
-        active={activeTool === 'duster'}
-        onClick={() => onToolChange('duster')}
-        icon={<AutoFixHighIcon sx={{ fontSize: 20 }} />}
-        tooltip="Eraser (D)"
-        testId="duster-button"
-      />
+      <Box
+        sx={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: 1,
+          padding: '10px 20px',
+          background: 'linear-gradient(180deg, #8b7355 0%, #5a4434 100%)',
+          borderRadius: '12px 12px 0 0',
+          boxShadow: '0 -4px 20px rgba(0, 0, 0, 0.4)',
+        }}
+      >
+        <Tooltip title="Chalk (C)" placement="top" arrow>
+          <IconButton
+            onClick={() => onToolChange('chalk')}
+            data-testid="chalk-button"
+            sx={{
+              width: 48,
+              height: 48,
+              borderRadius: 2,
+              backgroundColor: activeTool === 'chalk' 
+                ? 'rgba(255, 255, 255, 0.2)' 
+                : 'transparent',
+              '&:hover': {
+                backgroundColor: 'rgba(255, 255, 255, 0.15)',
+              },
+            }}
+          >
+            <ChalkIcon active={activeTool === 'chalk'} />
+          </IconButton>
+        </Tooltip>
 
-      <Divider />
+        <Tooltip title="Duster (D)" placement="top" arrow>
+          <IconButton
+            onClick={() => onToolChange('duster')}
+            data-testid="duster-button"
+            sx={{
+              width: 48,
+              height: 48,
+              borderRadius: 2,
+              backgroundColor: activeTool === 'duster' 
+                ? 'rgba(255, 255, 255, 0.2)' 
+                : 'transparent',
+              '&:hover': {
+                backgroundColor: 'rgba(255, 255, 255, 0.15)',
+              },
+            }}
+          >
+            <DusterIcon active={activeTool === 'duster'} />
+          </IconButton>
+        </Tooltip>
 
-      <ToolButton
-        onClick={() => onClear?.()}
-        icon={<DeleteOutlineIcon sx={{ fontSize: 20 }} />}
-        tooltip="Clear Board"
-      />
-      <ToolButton
-        onClick={() => onDownload?.()}
-        icon={<DownloadIcon sx={{ fontSize: 20 }} />}
-        tooltip="Download"
-      />
+        <Box sx={{ width: 1, height: 32, backgroundColor: 'rgba(255,255,255,0.2)', mx: 1 }} />
+
+        <Tooltip title="Clear Board" placement="top" arrow>
+          <IconButton
+            onClick={() => onClear?.()}
+            data-testid="clear-button"
+            sx={{
+              width: 40,
+              height: 40,
+              borderRadius: 2,
+              color: '#d4c4b0',
+              '&:hover': {
+                backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                color: '#fff',
+              },
+            }}
+          >
+            <TrashIcon />
+          </IconButton>
+        </Tooltip>
+
+        <Tooltip title="Download" placement="top" arrow>
+          <IconButton
+            onClick={() => onDownload?.()}
+            data-testid="download-button"
+            sx={{
+              width: 40,
+              height: 40,
+              borderRadius: 2,
+              color: '#d4c4b0',
+              '&:hover': {
+                backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                color: '#fff',
+              },
+            }}
+          >
+            <DownloadIcon />
+          </IconButton>
+        </Tooltip>
+      </Box>
     </Box>
   );
 };
