@@ -1,11 +1,13 @@
 import { useRef, useCallback, useEffect, useState } from 'react';
 import type { RefObject } from 'react';
 import type { Point, Tool } from '../types';
+import { canvasPersister } from '../utils/persister';
 
 const INITIAL_WIDTH = 3840;
 const INITIAL_HEIGHT = 2160;
 const EDGE_MARGIN = 120;
 const GROWTH_STEP = 1024;
+const SAVE_DEBOUNCE_MS = 500;
 
 type UseCanvasOptions = {
   scrollContainerRef?: RefObject<HTMLDivElement | null>;
@@ -16,11 +18,24 @@ export const useCanvas = (tool: Tool, options?: UseCanvasOptions) => {
   const isDrawingRef = useRef(false);
   const lastPointRef = useRef<Point | null>(null);
   const velocityRef = useRef(0);
+  const saveTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [canvasSize, setCanvasSize] = useState({
     width: INITIAL_WIDTH,
     height: INITIAL_HEIGHT,
   });
   const scrollContainerRef = options?.scrollContainerRef;
+
+  const saveCanvas = useCallback(() => {
+    if (saveTimeoutRef.current) {
+      clearTimeout(saveTimeoutRef.current);
+    }
+    saveTimeoutRef.current = setTimeout(() => {
+      const canvas = canvasRef.current;
+      if (canvas) {
+        canvasPersister.save(canvas);
+      }
+    }, SAVE_DEBOUNCE_MS);
+  }, []);
 
   const getContext = useCallback(() => {
     const canvas = canvasRef.current;
@@ -264,7 +279,8 @@ export const useCanvas = (tool: Tool, options?: UseCanvasOptions) => {
     isDrawingRef.current = false;
     lastPointRef.current = null;
     velocityRef.current = 0;
-  }, []);
+    saveCanvas();
+  }, [saveCanvas]);
 
   const clearCanvas = useCallback(() => {
     const canvas = canvasRef.current;
@@ -272,6 +288,7 @@ export const useCanvas = (tool: Tool, options?: UseCanvasOptions) => {
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
     ctx.clearRect(0, 0, canvas.width, canvas.height);
+    canvasPersister.clear();
   }, []);
 
   const downloadCanvas = useCallback(() => {
@@ -317,6 +334,25 @@ export const useCanvas = (tool: Tool, options?: UseCanvasOptions) => {
       canvas.removeEventListener('touchend', handleTouchEnd);
     };
   }, [startDrawing, draw, stopDrawing]);
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    canvasPersister.load(canvas).then((data) => {
+      if (data) {
+        setCanvasSize({ width: data.width, height: data.height });
+      }
+    });
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      if (saveTimeoutRef.current) {
+        clearTimeout(saveTimeoutRef.current);
+      }
+    };
+  }, []);
 
   return { canvasRef, canvasSize, clearCanvas, downloadCanvas };
 };
