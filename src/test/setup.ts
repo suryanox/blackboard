@@ -20,11 +20,9 @@ const canvasContextMock: CanvasRenderingContext2D = {
   clearRect: () => {},
 } as unknown as CanvasRenderingContext2D;
 
-const getContextMock: HTMLCanvasElement['getContext'] = (contextId) => {
+HTMLCanvasElement.prototype.getContext = ((contextId: string) => {
   if (contextId === '2d') {
     return canvasContextMock;
   }
   return null;
-};
-
-HTMLCanvasElement.prototype.getContext = getContextMock;
+}) as typeof HTMLCanvasElement.prototype.getContext;
