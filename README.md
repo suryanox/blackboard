@@ -15,13 +15,6 @@ https://suryanox.github.io/blackboard/
 - Keyboard shortcuts (C for chalk, D for duster)
 - Auto-save to localStorage (your drawing persists across sessions)
 
-## Architecture
-**Features:**
-- Saves canvas as base64 PNG with dimensions
-- Auto-saves after each stroke (debounced)
-- Loads previous drawing on app startup
-- Clears saved data when board is cleared
-
 ## Getting Started
 
 ```bash
