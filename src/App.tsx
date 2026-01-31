@@ -1,39 +1,36 @@
 import { useState, useEffect, useRef } from 'react';
 import { Box, CssBaseline, ThemeProvider, createTheme } from '@mui/material';
 import { Blackboard, Toolbar } from './components';
-import type { Tool, BoardColor } from './types';
+import type { BlackboardHandle } from './components';
+import type { Tool } from './types';
 
-const darkTheme = createTheme({
+const theme = createTheme({
   palette: {
-    mode: 'dark',
-    background: {
-      default: '#0a0a0a',
-      paper: '#121212',
-    },
+    mode: 'light',
   },
   components: {
     MuiTooltip: {
       styleOverrides: {
         tooltip: {
-          backgroundColor: 'rgba(30, 30, 35, 0.95)',
-          backdropFilter: 'blur(8px)',
-          fontSize: '0.8rem',
-          padding: '6px 12px',
-          borderRadius: 8,
-          boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)',
+          backgroundColor: '#1e293b',
+          fontSize: '0.75rem',
+          padding: '6px 10px',
+          borderRadius: 6,
         },
         arrow: {
-          color: 'rgba(30, 30, 35, 0.95)',
+          color: '#1e293b',
         },
       },
     },
   },
 });
 
+const BOARD_COLOR = '#1a1a1a';
+
 function App() {
   const [activeTool, setActiveTool] = useState<Tool>('chalk');
-  const [boardColor, setBoardColor] = useState<BoardColor>('green');
   const scrollContainerRef = useRef<HTMLDivElement | null>(null);
+  const blackboardRef = useRef<BlackboardHandle>(null);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -48,8 +45,16 @@ function App() {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, []);
 
+  const handleClear = () => {
+    blackboardRef.current?.clear();
+  };
+
+  const handleDownload = () => {
+    blackboardRef.current?.download();
+  };
+
   return (
-    <ThemeProvider theme={darkTheme}>
+    <ThemeProvider theme={theme}>
       <CssBaseline />
       <Box
         data-testid="app-container"
@@ -58,19 +63,20 @@ function App() {
           height: '100vh',
           overflow: 'auto',
           position: 'relative',
+          backgroundColor: BOARD_COLOR,
         }}
         ref={scrollContainerRef}
       >
         <Blackboard
+          ref={blackboardRef}
           tool={activeTool}
-          boardColor={boardColor}
           scrollContainerRef={scrollContainerRef}
         />
         <Toolbar 
           activeTool={activeTool} 
           onToolChange={setActiveTool}
-          boardColor={boardColor}
-          onBoardColorChange={setBoardColor}
+          onClear={handleClear}
+          onDownload={handleDownload}
         />
       </Box>
     </ThemeProvider>

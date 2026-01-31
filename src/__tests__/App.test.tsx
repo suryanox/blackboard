@@ -28,16 +28,10 @@ describe('App', () => {
     expect(dusterButton).toBeInTheDocument();
   });
 
-  it('switches board color when color option is clicked', () => {
+  it('switches to chalk tool when chalk is clicked', () => {
     render(<App />);
-    const blackButton = screen.getByTestId('board-color-black');
-    fireEvent.click(blackButton);
-    expect(blackButton).toBeInTheDocument();
-  });
-
-  it('renders board color picker', () => {
-    render(<App />);
-    expect(screen.getByTestId('board-color-green')).toBeInTheDocument();
-    expect(screen.getByTestId('board-color-black')).toBeInTheDocument();
+    const chalkButton = screen.getByTestId('chalk-button');
+    fireEvent.click(chalkButton);
+    expect(chalkButton).toBeInTheDocument();
   });
 });

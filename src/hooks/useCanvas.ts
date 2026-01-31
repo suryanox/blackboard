@@ -266,6 +266,24 @@ export const useCanvas = (tool: Tool, options?: UseCanvasOptions) => {
     velocityRef.current = 0;
   }, []);
 
+  const clearCanvas = useCallback(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+  }, []);
+
+  const downloadCanvas = useCallback(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    
+    const link = document.createElement('a');
+    link.download = 'blackboard.png';
+    link.href = canvas.toDataURL('image/png');
+    link.click();
+  }, []);
+
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -300,5 +318,5 @@ export const useCanvas = (tool: Tool, options?: UseCanvasOptions) => {
     };
   }, [startDrawing, draw, stopDrawing]);
 
-  return { canvasRef, canvasSize };
+  return { canvasRef, canvasSize, clearCanvas, downloadCanvas };
 };
