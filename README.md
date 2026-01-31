@@ -2,6 +2,9 @@
 
 A realistic blackboard drawing app with chalk and duster tools.
 
+## Demo
+https://suryanox.github.io/blackboard/
+
 ## Features
 
 - Fullscreen drawing canvas
@@ -22,11 +25,6 @@ Open http://localhost:5173
 ## Tech Stack
 
 React, TypeScript, Vite, MUI, Vitest
-
-## Deployment
-
-GitHub Pages via Actions. The workflow runs on each push to `main` and you can also trigger it manually.
-Expected URL: `https://suryanox.github.io/blackboard/`
 
 ## License
 
