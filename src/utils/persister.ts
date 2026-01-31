@@ -1,7 +1,7 @@
 const STORAGE_KEY = 'blackboard_canvas';
 const SIZE_KEY = 'blackboard_canvas_size';
 
-export interface CanvasData {
+interface CanvasData {
   imageData: string;
   width: number;
   height: number;
@@ -82,14 +82,6 @@ export class CanvasPersister {
       localStorage.removeItem(this.sizeKey);
     } catch (error) {
       console.warn('Failed to clear canvas from localStorage:', error);
-    }
-  }
-
-  hasSavedData(): boolean {
-    try {
-      return localStorage.getItem(this.storageKey) !== null;
-    } catch {
-      return false;
     }
   }
 }
