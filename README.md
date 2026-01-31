@@ -4,7 +4,7 @@ A realistic blackboard drawing app with chalk and duster tools.
 
 # Demo
 
-`https://suryanox.github.io/blackboard/`
+https://suryanox.github.io/blackboard/
 
 ## Features
 
