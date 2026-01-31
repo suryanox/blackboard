@@ -1,5 +1,7 @@
 export type Tool = 'chalk' | 'duster';
 
+export type BoardColor = 'black';
+
 export interface Point {
   x: number;
   y: number;
