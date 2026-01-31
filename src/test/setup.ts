@@ -6,9 +6,9 @@ class ResizeObserverMock {
   disconnect() {}
 }
 
-global.ResizeObserver = ResizeObserverMock;
+globalThis.ResizeObserver = ResizeObserverMock as unknown as typeof ResizeObserver;
 
-HTMLCanvasElement.prototype.getContext = () => ({
+const canvasContextMock: CanvasRenderingContext2D = {
   fillStyle: '',
   globalAlpha: 1,
   globalCompositeOperation: 'source-over',
@@ -18,4 +18,13 @@ HTMLCanvasElement.prototype.getContext = () => ({
   save: () => {},
   restore: () => {},
   clearRect: () => {},
-}) as unknown as CanvasRenderingContext2D;
+} as unknown as CanvasRenderingContext2D;
+
+const getContextMock: HTMLCanvasElement['getContext'] = (contextId) => {
+  if (contextId === '2d') {
+    return canvasContextMock;
+  }
+  return null;
+};
+
+HTMLCanvasElement.prototype.getContext = getContextMock;
