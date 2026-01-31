@@ -22,3 +22,7 @@ Open http://localhost:5173
 ## Tech Stack
 
 React, TypeScript, Vite, MUI, Vitest
+
+## License
+
+MIT. See `LICENSE`.
