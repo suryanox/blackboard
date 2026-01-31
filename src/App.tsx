@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Box, CssBaseline, ThemeProvider, createTheme } from '@mui/material';
 import { Blackboard, Toolbar } from './components';
 import type { Tool, BoardColor } from './types';
@@ -33,6 +33,7 @@ const darkTheme = createTheme({
 function App() {
   const [activeTool, setActiveTool] = useState<Tool>('chalk');
   const [boardColor, setBoardColor] = useState<BoardColor>('green');
+  const scrollContainerRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -55,11 +56,16 @@ function App() {
         sx={{
           width: '100vw',
           height: '100vh',
-          overflow: 'hidden',
+          overflow: 'auto',
           position: 'relative',
         }}
+        ref={scrollContainerRef}
       >
-        <Blackboard tool={activeTool} boardColor={boardColor} />
+        <Blackboard
+          tool={activeTool}
+          boardColor={boardColor}
+          scrollContainerRef={scrollContainerRef}
+        />
         <Toolbar 
           activeTool={activeTool} 
           onToolChange={setActiveTool}

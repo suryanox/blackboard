@@ -1,11 +1,26 @@
-import { useRef, useCallback, useEffect } from 'react';
+import { useRef, useCallback, useEffect, useState } from 'react';
+import type { RefObject } from 'react';
 import type { Point, Tool } from '../types';
 
-export const useCanvas = (tool: Tool) => {
+const INITIAL_WIDTH = 3840;
+const INITIAL_HEIGHT = 2160;
+const EDGE_MARGIN = 120;
+const GROWTH_STEP = 1024;
+
+type UseCanvasOptions = {
+  scrollContainerRef?: RefObject<HTMLDivElement | null>;
+};
+
+export const useCanvas = (tool: Tool, options?: UseCanvasOptions) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const isDrawingRef = useRef(false);
   const lastPointRef = useRef<Point | null>(null);
   const velocityRef = useRef(0);
+  const [canvasSize, setCanvasSize] = useState({
+    width: INITIAL_WIDTH,
+    height: INITIAL_HEIGHT,
+  });
+  const scrollContainerRef = options?.scrollContainerRef;
 
   const getContext = useCallback(() => {
     const canvas = canvasRef.current;
@@ -104,6 +119,78 @@ export const useCanvas = (tool: Tool) => {
     }
   }, []);
 
+  const resizeCanvas = useCallback((nextWidth: number, nextHeight: number) => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    if (canvas.width === nextWidth && canvas.height === nextHeight) return;
+
+    const prev = document.createElement('canvas');
+    prev.width = canvas.width;
+    prev.height = canvas.height;
+    const prevCtx = prev.getContext('2d');
+    if (prevCtx) {
+      prevCtx.drawImage(canvas, 0, 0);
+    }
+
+    canvas.width = nextWidth;
+    canvas.height = nextHeight;
+    setCanvasSize({ width: nextWidth, height: nextHeight });
+
+    const ctx = canvas.getContext('2d');
+    if (ctx && prevCtx) {
+      ctx.drawImage(prev, 0, 0);
+    }
+  }, []);
+
+  const maybeGrowCanvas = useCallback((point: Point) => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    let nextWidth = canvas.width;
+    let nextHeight = canvas.height;
+
+    if (point.x > canvas.width - EDGE_MARGIN) {
+      nextWidth = canvas.width + GROWTH_STEP;
+    }
+
+    if (point.y > canvas.height - EDGE_MARGIN) {
+      nextHeight = canvas.height + GROWTH_STEP;
+    }
+
+    if (nextWidth !== canvas.width || nextHeight !== canvas.height) {
+      resizeCanvas(nextWidth, nextHeight);
+    }
+  }, [resizeCanvas]);
+
+  const maybeAutoScroll = useCallback((point: Point) => {
+    const container = scrollContainerRef?.current;
+    const canvas = canvasRef.current;
+    if (!container || !canvas) return;
+
+    const { scrollLeft, scrollTop, clientWidth, clientHeight } = container;
+    const maxScrollLeft = Math.max(0, canvas.width - clientWidth);
+    const maxScrollTop = Math.max(0, canvas.height - clientHeight);
+
+    let nextLeft = scrollLeft;
+    let nextTop = scrollTop;
+
+    if (point.x > scrollLeft + clientWidth - EDGE_MARGIN) {
+      nextLeft = Math.min(point.x - clientWidth + EDGE_MARGIN, maxScrollLeft);
+    } else if (point.x < scrollLeft + EDGE_MARGIN) {
+      nextLeft = Math.max(point.x - EDGE_MARGIN, 0);
+    }
+
+    if (point.y > scrollTop + clientHeight - EDGE_MARGIN) {
+      nextTop = Math.min(point.y - clientHeight + EDGE_MARGIN, maxScrollTop);
+    } else if (point.y < scrollTop + EDGE_MARGIN) {
+      nextTop = Math.max(point.y - EDGE_MARGIN, 0);
+    }
+
+    if (nextLeft !== scrollLeft || nextTop !== scrollTop) {
+      container.scrollTo({ left: nextLeft, top: nextTop });
+    }
+  }, [scrollContainerRef]);
+
   const erase = useCallback((ctx: CanvasRenderingContext2D, point: Point, lastPoint: Point | null) => {
     const radius = 45;
     
@@ -159,6 +246,9 @@ export const useCanvas = (tool: Tool) => {
     const currentPoint = getPoint(e);
     const lastPoint = lastPointRef.current;
 
+    maybeGrowCanvas(currentPoint);
+    maybeAutoScroll(currentPoint);
+
     if (lastPoint) {
       if (tool === 'chalk') {
         drawChalkLine(ctx, lastPoint, currentPoint);
@@ -168,7 +258,7 @@ export const useCanvas = (tool: Tool) => {
     }
 
     lastPointRef.current = currentPoint;
-  }, [tool, getContext, getPoint, drawChalkLine, erase]);
+  }, [tool, getContext, getPoint, drawChalkLine, erase, maybeGrowCanvas, maybeAutoScroll]);
 
   const stopDrawing = useCallback(() => {
     isDrawingRef.current = false;
@@ -210,5 +300,5 @@ export const useCanvas = (tool: Tool) => {
     };
   }, [startDrawing, draw, stopDrawing]);
 
-  return { canvasRef };
+  return { canvasRef, canvasSize };
 };

@@ -2,10 +2,12 @@ import { Box } from '@mui/material';
 import { useCanvas } from '../hooks/useCanvas.ts';
 import { createChalkCursor, createDusterCursor } from '../utils/cursors.ts';
 import type { Tool, BoardColor } from '../types';
+import type { RefObject } from 'react';
 
 interface BlackboardProps {
   tool: Tool;
   boardColor: BoardColor;
+  scrollContainerRef?: RefObject<HTMLDivElement | null>;
 }
 
 const boardColors = {
@@ -21,30 +23,28 @@ const boardColors = {
   },
 };
 
-export const Blackboard = ({ tool, boardColor }: BlackboardProps) => {
-  const { canvasRef } = useCanvas(tool);
+export const Blackboard = ({ tool, boardColor, scrollContainerRef }: BlackboardProps) => {
+  const { canvasRef, canvasSize } = useCanvas(tool, { scrollContainerRef });
   const colors = boardColors[boardColor];
   const cursor = tool === 'chalk' ? createChalkCursor() : createDusterCursor();
 
   return (
     <Box
       sx={{
-        position: 'fixed',
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
+        position: 'relative',
+        width: `${canvasSize.width}px`,
+        height: `${canvasSize.height}px`,
         zIndex: 0,
       }}
     >
       <canvas
         ref={canvasRef}
         data-testid="blackboard-canvas"
-        width={3840}
-        height={2160}
+        width={canvasSize.width}
+        height={canvasSize.height}
         style={{
-          width: '100%',
-          height: '100%',
+          width: `${canvasSize.width}px`,
+          height: `${canvasSize.height}px`,
           backgroundColor: colors.base,
           backgroundImage: `
             radial-gradient(ellipse at 20% 20%, ${colors.gradient1} 0%, transparent 50%),
